@@ -26,9 +26,13 @@ model_coffe.load_state_dict(torch.load('models/coffee_save.pt', map_location=tor
 model_coffe.eval()
 coffee_dict = {0: 'Dark', 1: 'Green', 2: 'Light', 3: 'Medium'}
 
-# --------- crops ---------------
+# --------- agriculture ---------------
 
-
+model_agri = resnet50(weights=ResNet50_Weights.DEFAULT)
+model_agri.fc = nn.Linear(2048,4)
+model_agri.load_state_dict(torch.load('agriculture.pt', map_location=torch.device('mps')))
+model_agri.eval()
+agri_dict = {0: 'almond', 1: 'banana', 2: 'cardamon', 3: 'cherry', 4: 'chilli', 5: 'clove', 6: 'coconut', 7: 'coffee-plant', 8: 'cotton', 9: 'cucumber', 10: 'fox_nut(Makhana)', 11: 'gram', 12: 'jowar', 13: 'jute', 14: 'lemon', 15: 'maize', 16: 'mustard-oil', 17: 'olive-tree', 18: 'papaya', 19: 'pearl_millet(bajra)', 20: 'pineapple', 21: 'rice', 22: 'soyabean', 23: 'sugarcane', 24: 'sunflower', 25: 'tea', 26: 'tobacco-plant', 27: 'tomato', 28: 'vigna-radiati(Mung)', 29: 'wheat'}
 
 
 # --------- double --------------
@@ -87,7 +91,7 @@ if page == "Кофе":
                 st.subheader('Загруженная картинка')
                 st.image(image)
 
-    uploaded_file = st.file_uploader("Перетащите изображение сюда или кликните для выбора файла", type=['png', 'jpg', 'jpeg'])
+    uploaded_file = st.file_uploader("Перетащите картинку сюда или кликните для выбора файла", type=['png', 'jpg', 'jpeg'])
 
     if uploaded_file is not None:
                 image = Image.open(uploaded_file)
@@ -111,12 +115,18 @@ if page == "Агрокультуры":
                 st.subheader('Загруженная картинка')
                 st.image(image)
     
-    uploaded_file = st.file_uploader("Перетащите изображение сюда или кликните для выбора файла", type=['png', 'jpg', 'jpeg'])
+    uploaded_file = st.file_uploader("Перетащите картинку сюда или кликните для выбора файла", type=['png', 'jpg', 'jpeg'])
 
     if uploaded_file is not None:
                 image = Image.open(uploaded_file)
                 st.subheader('Загруженная картинка')
                 st.image(image)
+    
+    image = preprocess(image)
+    prediction = model_agri(image.unsqueeze(0)).softmax(dim=1).argmax().item()
+
+    
+    st.write('Предсказанный вид агрокультуры: ', agri_dict[prediction])
 
 if page == "Магическая страница":
     image_url = st.text_input("Введите URL изображения чего угодно")
@@ -127,7 +137,7 @@ if page == "Магическая страница":
                 st.subheader('Загруженная картинка')
                 st.image(image)
 
-    uploaded_file = st.file_uploader("Перетащите изображение сюда или кликните для выбора файла", type=['png', 'jpg', 'jpeg'])
+    uploaded_file = st.file_uploader("Перетащите картинку сюда или кликните для выбора файла", type=['png', 'jpg', 'jpeg'])
 
     if uploaded_file is not None:
                 image = Image.open(uploaded_file)
