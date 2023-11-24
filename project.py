@@ -10,23 +10,7 @@ import torch.nn as nn
 import json
 
 from models.preprocess import preprocess
-# -------- coffee -------------
 
-
-from torchvision.models import resnet50, ResNet50_Weights
-model_coffe = resnet50(weights=ResNet50_Weights.DEFAULT)
-model_coffe.fc = nn.Linear(2048,4)
-model_coffe.load_state_dict(torch.load('models/coffee_save.pt', map_location=torch.device('cpu')))
-model_coffe.eval()
-coffee_dict = {0: 'Dark', 1: 'Green', 2: 'Light', 3: 'Medium'}
-
-# --------- agriculture ---------------
-
-model_agri = resnet50(weights=ResNet50_Weights.DEFAULT)
-model_agri.fc = nn.Linear(2048,30)
-model_agri.load_state_dict(torch.load('models/agriculture.pt', map_location=torch.device('cpu')))
-model_agri.eval()
-agri_dict = {0: 'almond', 1: 'banana', 2: 'cardamon', 3: 'cherry', 4: 'chilli', 5: 'clove', 6: 'coconut', 7: 'coffee-plant', 8: 'cotton', 9: 'cucumber', 10: 'fox_nut(Makhana)', 11: 'gram', 12: 'jowar', 13: 'jute', 14: 'lemon', 15: 'maize', 16: 'mustard-oil', 17: 'olive-tree', 18: 'papaya', 19: 'pearl_millet(bajra)', 20: 'pineapple', 21: 'rice', 22: 'soyabean', 23: 'sugarcane', 24: 'sunflower', 25: 'tea', 26: 'tobacco-plant', 27: 'tomato', 28: 'vigna-radiati(Mung)', 29: 'wheat'}
 
 
 # --------- double --------------
@@ -77,6 +61,16 @@ if page == "Вводная информация":
 
 if page == "Кофе":
 
+    # -------- coffee -------------
+
+
+    from torchvision.models import resnet50, ResNet50_Weights
+    model_coffe = resnet50(weights=ResNet50_Weights.DEFAULT)
+    model_coffe.fc = nn.Linear(2048,4)
+    model_coffe.load_state_dict(torch.load('models/coffee_save.pt', map_location=torch.device('cpu')))
+    model_coffe.eval()
+    coffee_dict = {0: 'Dark', 1: 'Green', 2: 'Light', 3: 'Medium'}
+
     image_url = st.text_input("Введите URL картинки кофейного зерна")
     image = None
 
@@ -103,6 +97,16 @@ if page == "Кофе":
 
 if page == "Агрокультуры":
     
+    # --------- agriculture ---------------
+
+    model_agri = resnet50(weights=ResNet50_Weights.DEFAULT)
+    model_agri.fc = nn.Linear(2048,30)
+    model_agri.load_state_dict(torch.load('models/agriculture.pt', map_location=torch.device('cpu')))
+    model_agri.eval()
+    agri_dict = {0: 'almond', 1: 'banana', 2: 'cardamon', 3: 'cherry', 4: 'chilli', 5: 'clove', 6: 'coconut', 7: 'coffee-plant', 8: 'cotton', 9: 'cucumber', 10: 'fox_nut(Makhana)', 11: 'gram', 12: 'jowar', 13: 'jute', 14: 'lemon', 15: 'maize', 16: 'mustard-oil', 17: 'olive-tree', 18: 'papaya', 19: 'pearl_millet(bajra)', 20: 'pineapple', 21: 'rice', 22: 'soyabean', 23: 'sugarcane', 24: 'sunflower', 25: 'tea', 26: 'tobacco-plant', 27: 'tomato', 28: 'vigna-radiati(Mung)', 29: 'wheat'}
+
+
+    
     image_url = st.text_input("Введите URL картинки агрокультуры")
     image = None
 
@@ -125,6 +129,25 @@ if page == "Агрокультуры":
         st.write('Предсказанный вид агрокультуры: ', agri_dict[prediction])
 
 if page == "Магическая страница":
+    
+    from torchvision.models import resnet50, ResNet50_Weights
+    from torchvision.models import vgg19, VGG19_Weights
+    model_1 = vgg19(weights=VGG19_Weights.DEFAULT)
+    model_2 = resnet50(weights=ResNet50_Weights.DEFAULT)
+    def double_classify(img): 
+        model_1.eval()
+        model_2.eval()
+        pred1 = model_1(img.unsqueeze(0)).softmax(dim=1)
+        pred2 = model_2(img.unsqueeze(0)).softmax(dim=1)
+        pred_vote = (pred1 + pred2)/2
+        sorted, indices = torch.sort(pred_vote, descending=True)
+        top_5 = (sorted*100).tolist()[0][:5]
+        top_5_i = indices.tolist()[0][:5]
+        top_5_n = list(map(decode, top_5_i))
+        return top_5_n, top_5
+    labels = json.load(open('models/imagenet_class_index.json'))
+    decode = lambda x: labels[str(x)][1]
+    
     image = None
     image_url = st.text_input("Введите URL изображения чего угодно")
 
