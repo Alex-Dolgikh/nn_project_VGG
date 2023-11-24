@@ -13,6 +13,7 @@ import requests
 from PIL import Image
 import torch 
 import torch.nn as nn
+import json
 
 from models.preprocess import preprocess
 # -------- coffee -------------
@@ -29,6 +30,29 @@ coffee_dict = {0: 'Dark', 1: 'Green', 2: 'Light', 3: 'Medium'}
 
 
 
+
+# --------- double --------------
+
+from torchvision.models import vgg19, VGG19_Weights
+model_1 = vgg19(weights=VGG19_Weights.DEFAULT)
+model_2 = resnet50(weights=ResNet50_Weights.DEFAULT)
+def double_classify(img): 
+    model_1.eval()
+    model_2.eval()
+    pred1 = model_1(img.unsqueeze(0)).softmax(dim=1)
+    pred2 = model_2(img.unsqueeze(0)).softmax(dim=1)
+    pred_vote = (pred1 + pred2)/2
+    sorted, indices = torch.sort(pred_vote, descending=True)
+    top_5 = (sorted*100).tolist()[0][:5]
+    top_5_i = indices.tolist()[0][:5]
+    top_5_n = list(map(decode, top_5_i))
+    return top_5_n, top_5
+labels = json.load(open('models/imagenet_class_index.json'))
+decode = lambda x: labels[str(x)][1]
+
+
+
+# ----------- Streamlit --------------------------
 
 
 st.title('ПРОЕКТ: Определение агро-культур и цвета зёрен кофе')
@@ -110,6 +134,12 @@ if page == "Магическая страница":
                 st.subheader('Загруженная картинка')
                 st.image(image)
 
+    image = preprocess(image)
+    classes_pred, prob_pred = double_classify(image)
+
+    for i in range(5): 
+        st.write(f'С вероятностью {prob_pred[i]}% это {classes_pred[i]}')
+    # chart_data = pd.DataFrame(prob_pred)
 
 
 
