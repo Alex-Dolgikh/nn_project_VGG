@@ -1,12 +1,6 @@
 import numpy as np
 import pandas as pd
-
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-
 import streamlit as st
-# import plotly_express as px
-from plotly.tools import mpl_to_plotly
 import io
 import imageio
 import requests
