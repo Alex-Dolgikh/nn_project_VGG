@@ -84,6 +84,7 @@ if page == "Вводная информация":
 if page == "Кофе":
 
     image_url = st.text_input("Введите URL картинки кофейного зерна")
+    image = None
 
     if image_url:
                 response = requests.get(image_url)
@@ -98,16 +99,18 @@ if page == "Кофе":
                 st.subheader('Загруженная картинка')
                 st.image(image)
 
-    image = preprocess(image)
-    prediction = model_coffe(image.unsqueeze(0)).softmax(dim=1).argmax().item()
-
     
-    st.write('Предсказанный вид кофе: ', coffee_dict[prediction])
+    if image is not None:
+        image = preprocess(image)
+        prediction = model_coffe(image.unsqueeze(0)).softmax(dim=1).argmax().item()
+        st.write('Предсказанный вид кофе: ', coffee_dict[prediction])
+
     
 
 if page == "Агрокультуры":
     
     image_url = st.text_input("Введите URL картинки агрокультуры")
+    image = None
 
     if image_url:
                 response = requests.get(image_url)
@@ -122,13 +125,13 @@ if page == "Агрокультуры":
                 st.subheader('Загруженная картинка')
                 st.image(image)
     
-    image = preprocess(image)
-    prediction = model_agri(image.unsqueeze(0)).softmax(dim=1).argmax().item()
-
-    
-    st.write('Предсказанный вид агрокультуры: ', agri_dict[prediction])
+    if image is not None:
+        image = preprocess(image)
+        prediction = model_agri(image.unsqueeze(0)).softmax(dim=1).argmax().item()
+        st.write('Предсказанный вид агрокультуры: ', agri_dict[prediction])
 
 if page == "Магическая страница":
+    image = None
     image_url = st.text_input("Введите URL изображения чего угодно")
 
     if image_url:
@@ -144,11 +147,11 @@ if page == "Магическая страница":
                 st.subheader('Загруженная картинка')
                 st.image(image)
 
-    image = preprocess(image)
-    classes_pred, prob_pred = double_classify(image)
-
-    for i in range(5): 
-        st.write(f'С вероятностью {prob_pred[i]}% это {classes_pred[i]}')
+    if image is not None:
+            image = preprocess(image)
+            classes_pred, prob_pred = double_classify(image)
+            for i in range(5): 
+                    st.write(f'С вероятностью {prob_pred[i]}% это {classes_pred[i]}')
     # chart_data = pd.DataFrame(prob_pred)
 
 
