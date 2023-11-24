@@ -80,7 +80,7 @@ tzlocal==5.2
 urllib3==2.1.0
 validators==0.22.0
 watchdog==3.0.0
-zipp==3.17.0aiogram==2.23.1
+zipp==3.17.0
 aiohttp==3.8.6
 aiosignal==1.3.1
 altair==5.1.2
